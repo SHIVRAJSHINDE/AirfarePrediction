@@ -4,13 +4,13 @@ import pandas as pd
 import mlflow.sklearn
 from sklearn.model_selection import RandomizedSearchCV
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
-from sklearn.linear_model import ElasticNet
+from sklearn.linear_model import Ridge, Lasso, ElasticNet
 
 
-class ModelTrainerOptimizerClass:
+class ModelTrainerClass:
 
     def __init__(self, X_train_path, y_train_path, params_path):
-        """Initialize the trainer optimizer with paths and load necessary data."""
+        """Initialize the trainer  with paths and load necessary data."""
         self.X_train_path = X_train_path
         self.y_train_path = y_train_path
         self.params_path = params_path
@@ -30,9 +30,17 @@ class ModelTrainerOptimizerClass:
     def load_params(self):
         """Load parameters from the YAML file."""
         with open(self.params_path, "r") as file:
-            self.params = yaml.safe_load(file)
-        return self.params
+            self.modelWithParams = yaml.safe_load(file)
+            self.modelWithParams = self.modelWithParams['model']
+            
+
+        return self.modelWithParams
     
+    def get_Model_class(self,model):
+        model_class = globals()[model.split('.')[-1]]  # Get the class from the model name
+        model = model_class()  # Instantiate the model
+        return model
+
     def train_model(self, model, param_grid):
         """Train the model using RandomizedSearchCV."""
         random_search = RandomizedSearchCV(estimator=model, param_distributions=param_grid, cv=5)
@@ -103,33 +111,36 @@ if __name__ == "__main__":
 
     X_train_path = "Data\\04_encoded_Data\\X_train.csv"
     y_train_path = "Data\\04_encoded_Data\\y_train.csv"
-    params_path = "params.yaml"
+    params_path = "modelsParams.yaml"
     tracking_uri = "http://localhost:5000"
 
-    # Initialize the ModelTrainerOptimizerObj
-    ModelTrainerOptimizerObj = ModelTrainerOptimizerClass(X_train_path, y_train_path, params_path)
+    # Initialize the ModelTrainerObj
+    ModelTrainerObj = ModelTrainerClass(X_train_path, y_train_path, params_path)
 
     # Load data and params
-    X_train = ModelTrainerOptimizerObj.load_X_train()
-    y_train = ModelTrainerOptimizerObj.load_y_train()
-    params = ModelTrainerOptimizerObj.load_params()
+    X_train = ModelTrainerObj.load_X_train()
+    y_train = ModelTrainerObj.load_y_train()
+    modelWithParams = ModelTrainerObj.load_params()
     print("----------------------------------------------------")
-    print(params)
-    # Set up model and parameter grid
-    elasticnet_model = ElasticNet()
-    params_grid = params["elasticnet"]
-    print(params_grid)
+    #print(modelParams['model'])
+    for value in modelWithParams.values():
+        model = value['model']
+        model = ModelTrainerObj.get_Model_class(model)
+        params_Grid = value['param']
 
-    # Train the model
-    best_model, best_params, predicted_y = ModelTrainerOptimizerObj.train_model(elasticnet_model, params_grid)
+        print(model)
+        print(params_Grid)
 
-    # Calculate metrics
-    mse, mae, rmse, r2, aR2 = ModelTrainerOptimizerObj.calculate_metrics(X_train, y_train, predicted_y)
+        # Train the model
+        best_model, best_params, predicted_y = ModelTrainerObj.train_model(model, params_Grid)
 
-    # Log the model name
-    model_name = ModelTrainerOptimizerObj.get_Model_Name(elasticnet_model)
-    print(f"Model Name: {model_name}")
+        # Calculate metrics
+        mse, mae, rmse, r2, aR2 = ModelTrainerObj.calculate_metrics(X_train, y_train, predicted_y)
 
-    # Initialize MLflowLogger and log results
-    MLflowLoggerObj = MLflowLoggerClass(tracking_uri)  # Replace with your URI
-    MLflowLoggerObj.log_results(model_name, best_model, best_params, mse, mae, rmse, r2, aR2)
+        # Log the model name
+        model_name = ModelTrainerObj.get_Model_Name(model)
+        print(f"Model Name: {model_name}")
+
+        # Initialize MLflowLogger and log results
+        MLflowLoggerObj = MLflowLoggerClass(tracking_uri)  # Replace with your URI
+        MLflowLoggerObj.log_results(model_name, best_model, best_params, mse, mae, rmse, r2, aR2)

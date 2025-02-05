@@ -1,4 +1,0 @@
-
-elasticnet: "sklearn.linear_model.ElasticNet"
-ridge: "sklearn.linear_model.Ridge"
-lasso: "sklearn.linear_model.Lasso"

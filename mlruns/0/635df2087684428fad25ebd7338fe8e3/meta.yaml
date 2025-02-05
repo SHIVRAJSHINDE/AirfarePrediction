@@ -1,8 +1,9 @@
 artifact_uri: mlflow-artifacts:/0/635df2087684428fad25ebd7338fe8e3/artifacts
+deleted_time: 1738774078650
 end_time: 1738759301082
 entry_point_name: ''
 experiment_id: '0'
-lifecycle_stage: active
+lifecycle_stage: deleted
 run_id: 635df2087684428fad25ebd7338fe8e3
 run_name: ElasticNet
 run_uuid: 635df2087684428fad25ebd7338fe8e3
