@@ -1,0 +1,19 @@
+lasso:
+  alpha: [6, 13 ]
+  fit_intercept: [true, false]
+  max_iter: [1000, 2000]
+  tol: [0.0001, 0.001]
+
+ridge:
+  alpha: [6, 13 ]
+  solver: ['auto', 'svd', 'cholesky']
+  fit_intercept: [true, false]
+  max_iter: [1000, 2000]
+  tol: [0.0001, 0.001]
+
+elasticnet:
+  alpha: [ 6, 13 ]
+  l1_ratio: [0.1, 0.5, 0.9, 1.0]
+  fit_intercept: [true, false]
+  max_iter: [1000, 2000]
+  tol: [0.0001, 0.001]

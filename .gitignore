@@ -172,3 +172,7 @@ cython_debug/
 
 Data
 /Data
+mlartifacts
+mlruns
+/mlartifacts
+/mlruns
